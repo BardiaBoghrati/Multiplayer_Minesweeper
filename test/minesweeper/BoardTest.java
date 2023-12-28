@@ -4,6 +4,8 @@
 package minesweeper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -107,7 +109,7 @@ public class BoardTest {
     }
     
     @Test
-    public void testDigSqaureWithFlaggedMinedSquare() {
+    public void testDigSqaureNextToFlaggedMinedSquare() {
         Board board = new Board(3, 1, "1 0 0\n");
         board.flag(0, 0);
         
@@ -504,5 +506,29 @@ public class BoardTest {
                      "- -\n"+
                      "- -\n"+
                      "- -\n", board.toString());
+    }
+    
+    @Test
+    public void testMineExplosion() {
+        Board board;
+        
+        board = new Board(1, 1, "0\n");
+        board.flag(0, 0);
+        
+        assertFalse(board.dig(0, 0)); //Dig flagged square with no mine
+        
+        board.deflag(0, 0);
+        
+        assertFalse(board.dig(0, 0)); //Dig untouched square with no mine
+        
+        board = new Board(1, 1, "1\n");
+        board.flag(0, 0);
+        
+        assertFalse(board.dig(0, 0)); //Dig flagged mined square
+        
+        board.deflag(0, 0);
+        
+        assertTrue(board.dig(0, 0)); //Dig untouched mined square
+        assertFalse(board.dig(0, 0)); //Dig square with exploded mine
     }
 }
