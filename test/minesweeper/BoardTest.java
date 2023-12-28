@@ -531,4 +531,13 @@ public class BoardTest {
         assertTrue(board.dig(0, 0)); //Dig untouched mined square
         assertFalse(board.dig(0, 0)); //Dig square with exploded mine
     }
+    
+    @Test
+    public void testDigExpandAfterExplosion() {
+        Board board = new Board(5, 1, "0 0 1 0 1\n");
+        
+        assertTrue(board.dig(2, 0));
+        assertEquals("      1 -\n", board.toString());
+
+    }
 }
