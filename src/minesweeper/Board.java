@@ -26,37 +26,19 @@ public class Board {
     
     // TODO: Specify, test, and implement in problem 2
     
-    private enum SquareState {
-        Untouched,
-        Flagged,
-        Dug
-    }
-
-    private class Square {
-        private int x;
-        private int y;
+    private static class Square {
         private boolean mined;
-        private SquareState state;
+        private State state;
         
-        Square(int x, int y, boolean mined) {
-            this.x = x;
-            this.y = y;
+        private enum State {
+            Untouched,
+            Flagged,
+            Dug
+        }
+        
+        Square(boolean mined) {
             this.mined = mined;
-            this.state = SquareState.Untouched;
-        }
-        
-        /**
-         * @return x-coordinate of this square the in board
-         */
-        int x() {
-            return x;
-        }
-        
-        /**
-         * @return y-coordinate of this square in the board
-         */
-        int y() {
-            return y;
+            this.state = State.Untouched;
         }
         
         /**
@@ -65,8 +47,8 @@ public class Board {
          * @return true if this dig exploded a mine.
          */
         boolean dig() {
-            if (state == SquareState.Untouched) {
-                state = SquareState.Dug;
+            if (state == State.Untouched) {
+                state = State.Dug;
             }
             
             if (mined) {
@@ -88,8 +70,8 @@ public class Board {
          * Flag this square
          */
         void flag() {
-            if(state == SquareState.Untouched) {
-                state = SquareState.Flagged;
+            if(state == State.Untouched) {
+                state = State.Flagged;
             }
         }
         
@@ -97,15 +79,15 @@ public class Board {
          * Deflag this square
          */
         void deflag() {
-            if(state == SquareState.Flagged) {
-                state = SquareState.Untouched;
+            if(state == State.Flagged) {
+                state = State.Untouched;
             }
         }
         
         /**
          * @return The sate of this square
          */
-        SquareState state() {
+        State state() {
             return state;
         }   
     }
@@ -201,9 +183,9 @@ public class Board {
             for(int i = 0; i < sizeX; i++) {
                 int value = Integer.parseInt(values[i]);
                 if (value == 1) {
-                    board[j][i] = new Square(i, j, true);
+                    board[j][i] = new Square(true);
                 } else if (value == 0) {
-                    board[j][i] = new Square(i, j, false);
+                    board[j][i] = new Square(false);
                 } else {
                     throw new IllegalArgumentException("value %d,%d in the grid provided is neither a 1 nor a 0");
                 }
@@ -226,7 +208,7 @@ public class Board {
      * @return true if a mine exploded
      */
     public boolean dig(int x, int y) {
-        if (!inBound(x, y) || board[y][x].state() != SquareState.Untouched) {
+        if (!inBound(x, y) || board[y][x].state() != Square.State.Untouched) {
             return false;
         }
         final boolean exploded = board[y][x].dig();
