@@ -492,4 +492,17 @@ public class BoardTest {
         
         assertEquals("F\n", board.toString());
     }
+    
+    @Test
+    public void testBoardLineTermination() {
+        Board board = new Board(2, 4, "0 0\n"+
+                                      "0 0\r"+
+                                      "0 0\r\n"+
+                                      "0 0\n");
+        
+        assertEquals("- -\n"+
+                     "- -\n"+
+                     "- -\n"+
+                     "- -\n", board.toString());
+    }
 }
