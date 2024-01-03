@@ -155,8 +155,9 @@ public class MinesweeperServer {
     private void handleConnection(Socket socket) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
-        out.println("Welcome"); // Send hello message immediately after connection.
+        
+        // Send hello message immediately after connection.
+        out.println(String.format(HELLO_MESSAGE_FORMAT, board.sizeX(), board.sizeY(), 1)); //TODO placeholder
 
         try {
             for (String line = in.readLine(); line != null; line = in.readLine()) {

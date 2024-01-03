@@ -202,6 +202,7 @@ public class Board {
      *            Size of the board along y-axis
      */
     public Board(int sizeX, int sizeY) {
+        //TODO placeholder
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         board = new Square[sizeY][sizeX];
