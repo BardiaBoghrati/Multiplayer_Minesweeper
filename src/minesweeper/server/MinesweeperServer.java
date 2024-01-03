@@ -23,70 +23,177 @@ public class MinesweeperServer {
     private static final int MAXIMUM_PORT = 65535;
     /** Default square board size. */
     private static final int DEFAULT_SIZE = 10;
+    
+    /**
+     * Format of the hello message returned on client connection. First integer
+     * argument is the size of the board along x-axis. Second argument is the
+     * size of the board along y-axis. Third argument is the number of
+     * players connected to the server
+     */
+    static final String HELLO_MESSAGE_FORMAT = "Welcome to Minesweeper. Board: %1$d columns by %2$d rows. Players: %3$d including you. Type 'help' for help.";
+    /** Help message */
+    static final String HELP_MESSAGE = "Usage: 'look' | 'help' | 'bye' | '(dig | flag | deflag) X Y' where X Y are integers";
+    /** BOOM message*/
+    static final String BOOM_MESSAGE = "BOOM!";
 
     /** Socket for receiving incoming connections. */
     private final ServerSocket serverSocket;
     /** True if the server should *not* disconnect a client after a BOOM message. */
     private final boolean debug;
+    /** Minesweeper board*/
+    private final Board board;
 
     // TODO: Abstraction function, rep invariant, rep exposure
 
     /**
-     * Make a MinesweeperServer that listens for connections on port.
+     * Make a MinesweeperServer, initialized with a random board of size 10 by
+     * 10, that listens for connections on port.
      * 
-     * @param port port number, requires 0 <= port <= 65535
-     * @param debug debug mode flag
-     * @throws IOException if an error occurs opening the server socket
+     * @param port
+     *            port number, requires 0 <= port <= 65535
+     * @param debug
+     *            debug mode flag
+     * @throws IOException
+     *             if an error occurs opening the server socket
      */
     public MinesweeperServer(int port, boolean debug) throws IOException {
         serverSocket = new ServerSocket(port);
         this.debug = debug;
+        board = null; // new Board(10, 10);
+    }
+    
+    /**
+     * Make a MinesweeperServer, initialized with a random board of sizeX by
+     * sizeY, that listens for connections on port.
+     * 
+     * @param port
+     *            port number, requires 0 <= port <= 65535
+     * @param debug
+     *            debug mode flag
+     * @param sizeX
+     *            width of the board, requires sizeX > 0
+     * @param sizeY
+     *            height of the board, requires sizeY > 0
+     * @throws IOException
+     *             if an error occurs opening the server socket
+     */
+    public MinesweeperServer(int port, boolean debug, int sizeX, int sizeY) throws IOException {
+        serverSocket = new ServerSocket(port);
+        this.debug = debug;
+        board = null; // new Board(sizeX, sizeY);
+    }
+    
+    /**
+     * Make a MinesweeperServer, initialized with a board loaded from a file,
+     * listening on the specified port for connections.
+     * 
+     * @param port
+     *            port number, requires 0 <= port <= 65535. Specifying port
+     *            number 0 will assign any available port.
+     * @param debug
+     *            debug mode flag
+     * @param file
+     *            file from which the the board is initialized
+     * @throws IOException
+     *             if an error occurs loading the file or opening the server
+     *             socket
+     */
+    public MinesweeperServer(int port, boolean debug, File file) throws IOException {
+        serverSocket = new ServerSocket(port);
+        this.debug = debug;
+
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            String[] dimensions = in.readLine().split(" ");
+
+            if (dimensions.length != 2) {
+                throw new RuntimeException("Improper file format");
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int character = in.read(); character != -1; character = in.read()) {
+                sb.append((char) character);
+            }
+
+            board = new Board(Integer.parseInt(dimensions[0]), Integer.parseInt(dimensions[1]), sb.toString());
+        } catch (IllegalArgumentException iae) {
+            throw new RuntimeException("Improper file format", iae);
+        }
     }
 
     /**
      * Run the server, listening for client connections and handling them.
      * Never returns unless an exception is thrown.
      * 
-     * @throws IOException if the main server socket is broken
+     * @throws IOException if the main server socket is broken or the server has been terminated
      *                     (IOExceptions from individual clients do *not* terminate serve())
      */
     public void serve() throws IOException {
         while (true) {
             // block until a client connects
-            Socket socket = serverSocket.accept();
+            final Socket socket = serverSocket.accept();
 
-            // handle the client
-            try {
-                handleConnection(socket);
-            } catch (IOException ioe) {
-                ioe.printStackTrace(); // but don't terminate serve()
-            } finally {
-                socket.close();
-            }
+            new Thread(new Runnable() {
+                public void run() {
+                    // handle the client
+                    try {
+                        handleConnection(socket);
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
+                }
+            }).start();
         }
+    }
+    
+    /**
+     * Terminates this server. The socket on which the server is listening is
+     * closed, and any thread running serve() will throw IOException indicating
+     * the termination of the server. Once the server is terminated, it can no
+     * longer be restarted; any attempt to do so with throw an IOException.
+     * Individual client connections are *not* terminated.
+     * 
+     * @throws IOException
+     *             if an I/O error occurs when terminating the server.
+     */
+    public void terminate() throws IOException {
+        serverSocket.close();
     }
 
     /**
      * Handle a single client connection. Returns when client disconnects.
      * 
-     * @param socket socket where the client is connected
-     * @throws IOException if the connection encounters an error or terminates unexpectedly
+     * @param socket
+     *            socket where the client is connected
+     * @throws IOException
+     *             if the connection encounters an error or terminates
+     *             unexpectedly
      */
     private void handleConnection(Socket socket) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
+        out.println("Welcome"); // Send hello message immediately after connection.
+
         try {
             for (String line = in.readLine(); line != null; line = in.readLine()) {
                 String output = handleRequest(line);
-                if (output != null) {
+
+                if (output == null) {
                     // TODO: Consider improving spec of handleRequest to avoid use of null
-                    out.println(output);
+                    break;
+                }
+                
+                out.println(output);
+                
+                if (output.equals(BOOM_MESSAGE) && !debug) {
+                    break;
                 }
             }
         } finally {
             out.close();
             in.close();
+            socket.close();
         }
     }
 
@@ -101,36 +208,45 @@ public class MinesweeperServer {
                      + "(dig -?\\d+ -?\\d+)|(flag -?\\d+ -?\\d+)|(deflag -?\\d+ -?\\d+)";
         if ( ! input.matches(regex)) {
             // invalid input
-            // TODO Problem 5
+            return HELP_MESSAGE;
         }
         String[] tokens = input.split(" ");
         if (tokens[0].equals("look")) {
             // 'look' request
-            // TODO Problem 5
+            return board.toString().replaceAll("\n$", "");
         } else if (tokens[0].equals("help")) {
             // 'help' request
-            // TODO Problem 5
+            return HELP_MESSAGE;
         } else if (tokens[0].equals("bye")) {
             // 'bye' request
-            // TODO Problem 5
+            return null;
         } else {
             int x = Integer.parseInt(tokens[1]);
             int y = Integer.parseInt(tokens[2]);
             if (tokens[0].equals("dig")) {
                 // 'dig x y' request
-                // TODO Problem 5
+                return board.dig(x, y) ? BOOM_MESSAGE : board.toString().replaceAll("\n$", "");
             } else if (tokens[0].equals("flag")) {
                 // 'flag x y' request
-                // TODO Problem 5
+                board.flag(x, y);
+                return board.toString().replaceAll("\n$", "");
             } else if (tokens[0].equals("deflag")) {
                 // 'deflag x y' request
-                // TODO Problem 5
+                board.deflag(x, y);
+                return board.toString().replaceAll("\n$", "");
             }
         }
         // TODO: Should never get here, make sure to return in each of the cases above
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @return the port assigned to the server socket
+     */
+    public int port() {
+        return serverSocket.getLocalPort();
+    }
+    
     /**
      * Start a MinesweeperServer using the given arguments.
      * 
