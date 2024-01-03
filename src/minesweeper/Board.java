@@ -310,5 +310,19 @@ public class Board {
 
         return sb.toString();
     }
+    
+    /**
+     * @return Length of the board along x-axis--width.
+     */
+    public int sizeX() {
+        return sizeX;
+    }
+    
+    /**
+     * @return Length of the board along y-axis--height.
+     */
+    public int sizeY() {
+        return sizeY;
+    }
 
 }

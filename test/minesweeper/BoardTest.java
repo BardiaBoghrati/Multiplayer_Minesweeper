@@ -540,4 +540,38 @@ public class BoardTest {
         assertEquals("      1 -\n", board.toString());
 
     }
+    
+    @Test
+    public void testBoardSize() {
+        Board board;
+        
+        board = new Board(1, 1, "0\n");
+        
+        assertEquals(1, board.sizeX());
+        assertEquals(1, board.sizeY());
+        assertEquals("-\n", board.toString());
+        
+        board = new Board(2, 1, "0 0\n");
+        
+        assertEquals(2, board.sizeX());
+        assertEquals(1, board.sizeY());
+        assertEquals("- -\n", board.toString());
+        
+        board = new Board(1, 2, "0\n"+
+                                "0\n");
+        
+        assertEquals(1, board.sizeX());
+        assertEquals(2, board.sizeY());
+        assertEquals("-\n"+
+                     "-\n", board.toString());
+        
+        board = new Board(2, 2, "0 0\n"+
+                                "0 0\n");
+        
+        assertEquals(2, board.sizeX());
+        assertEquals(2, board.sizeY());
+        assertEquals("- -\n"+
+                     "- -\n", board.toString());
+
+    }
 }
