@@ -126,7 +126,7 @@ public class MinesweeperServerTest {
 //    }
     @Test
     public void testInvalidMessageType() throws IOException {
-        MinesweeperServer server = new MinesweeperServer(0, true);
+        MinesweeperServer server = new MinesweeperServer(0, true, 10, 10);
         Thread serverThread = new Thread(new Runnable() {
 
             @Override
@@ -155,7 +155,7 @@ public class MinesweeperServerTest {
     
     @Test
     public void testInvalidMessageArgument() throws IOException {
-        MinesweeperServer server = new MinesweeperServer(0, true);
+        MinesweeperServer server = new MinesweeperServer(0, true, 10, 10);
         Thread serverThread = new Thread(new Runnable() {
 
             @Override
@@ -186,7 +186,7 @@ public class MinesweeperServerTest {
     
     @Test
     public void testInvalidNumberOfArguments() throws IOException {
-        MinesweeperServer server = new MinesweeperServer(0, true);
+        MinesweeperServer server = new MinesweeperServer(0, true, 10, 10);
         Thread serverThread = new Thread(new Runnable() {
 
             @Override
@@ -219,7 +219,7 @@ public class MinesweeperServerTest {
     
     @Test
     public void testCaseSensitivity() throws IOException {
-        MinesweeperServer server = new MinesweeperServer(0, true);
+        MinesweeperServer server = new MinesweeperServer(0, true, 10, 10);
         Thread serverThread = new Thread(new Runnable() {
 
             @Override
@@ -248,7 +248,7 @@ public class MinesweeperServerTest {
     
     @Test
     public void testTooManySpacesBetweenArguments() throws IOException {
-        MinesweeperServer server = new MinesweeperServer(0, true);
+        MinesweeperServer server = new MinesweeperServer(0, true, 10, 10);
         Thread serverThread = new Thread(new Runnable() {
 
             @Override
@@ -384,7 +384,7 @@ public class MinesweeperServerTest {
     
     @Test
     public void testByeMessage() throws IOException {
-        MinesweeperServer server = new MinesweeperServer(0, true);
+        MinesweeperServer server = new MinesweeperServer(0, true, 10, 10);
         Thread serverThread = new Thread(new Runnable() {
 
             @Override
@@ -450,7 +450,7 @@ public class MinesweeperServerTest {
     
     @Test
     public void testHelpMessage() throws IOException {
-        MinesweeperServer server = new MinesweeperServer(0, true);
+        MinesweeperServer server = new MinesweeperServer(0, true, 10, 10);
         Thread serverThread = new Thread(new Runnable() {
 
             @Override

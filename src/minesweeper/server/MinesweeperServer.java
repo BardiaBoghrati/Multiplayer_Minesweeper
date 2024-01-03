@@ -44,23 +44,6 @@ public class MinesweeperServer {
     private final Board board;
 
     // TODO: Abstraction function, rep invariant, rep exposure
-
-    /**
-     * Make a MinesweeperServer, initialized with a random board of size 10 by
-     * 10, that listens for connections on port.
-     * 
-     * @param port
-     *            port number, requires 0 <= port <= 65535
-     * @param debug
-     *            debug mode flag
-     * @throws IOException
-     *             if an error occurs opening the server socket
-     */
-    public MinesweeperServer(int port, boolean debug) throws IOException {
-        serverSocket = new ServerSocket(port);
-        this.debug = debug;
-        board = null; // new Board(10, 10);
-    }
     
     /**
      * Make a MinesweeperServer, initialized with a random board of sizeX by
@@ -80,7 +63,7 @@ public class MinesweeperServer {
     public MinesweeperServer(int port, boolean debug, int sizeX, int sizeY) throws IOException {
         serverSocket = new ServerSocket(port);
         this.debug = debug;
-        board = null; // new Board(sizeX, sizeY);
+        board = null; //new Board(sizeX, sizeY);
     }
     
     /**
@@ -365,7 +348,7 @@ public class MinesweeperServer {
         
         // TODO: Continue implementation here in problem 4
         
-        MinesweeperServer server = new MinesweeperServer(port, debug);
+        MinesweeperServer server = new MinesweeperServer(port, debug, sizeX, sizeY);
         server.serve();
     }
 }
