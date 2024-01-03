@@ -63,7 +63,7 @@ public class MinesweeperServer {
     public MinesweeperServer(int port, boolean debug, int sizeX, int sizeY) throws IOException {
         serverSocket = new ServerSocket(port);
         this.debug = debug;
-        board = null; //new Board(sizeX, sizeY);
+        board = new Board(sizeX, sizeY);
     }
     
     /**
