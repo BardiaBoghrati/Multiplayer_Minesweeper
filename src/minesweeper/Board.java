@@ -227,19 +227,6 @@ public class Board {
         return exploded;
     }
     
-//    public void dig(int x, int y) {
-//        try {
-//            if(board[x][y].dig()) {
-//                expand(x,y);  
-//            }
-//        } catch (ExplosionException ee) {
-//            expand(x,y);
-//            throw ee;
-//        } catch (IndexOutOfBoundsExcpetion ie) {
-//            return;
-//        }
-//    }
-
     /**
      * If x,y are out of bounds, the boards' state remains unchanged. If x,y are
      * in bounds, flag square x,y if untouched, otherwise leave the state as is.
