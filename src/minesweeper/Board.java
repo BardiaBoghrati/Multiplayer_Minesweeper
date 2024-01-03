@@ -192,6 +192,18 @@ public class Board {
             }
         }
     }
+    
+    /**
+     * Create a sizeX by sizeY board populated with bombs at random locations.
+     * 
+     * @param sizeX
+     *            Size of the board along x-axis
+     * @param sizeY
+     *            Size of the board along y-axis
+     */
+    public Board(int sizeX, int sizeY) {
+        throw new RuntimeException("not implemented");
+    }
 
     /**
      * If x,y are out of bounds, the board's state remains unchanged. If x,y are
