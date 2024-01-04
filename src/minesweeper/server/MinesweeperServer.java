@@ -40,6 +40,8 @@ public class MinesweeperServer {
     private final ServerSocket serverSocket;
     /** True if the server should *not* disconnect a client after a BOOM message. */
     private final boolean debug;
+    /** Number of connected clients*/
+    private int numberOfClients;
     /** Minesweeper board*/
     private final Board board;
 
@@ -63,6 +65,7 @@ public class MinesweeperServer {
     public MinesweeperServer(int port, boolean debug, int sizeX, int sizeY) throws IOException {
         serverSocket = new ServerSocket(port);
         this.debug = debug;
+        numberOfClients = 0;
         board = new Board(sizeX, sizeY);
     }
     
@@ -84,7 +87,8 @@ public class MinesweeperServer {
     public MinesweeperServer(int port, boolean debug, File file) throws IOException {
         serverSocket = new ServerSocket(port);
         this.debug = debug;
-
+        numberOfClients = 0;
+        
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
             String[] dimensions = in.readLine().split(" ");
 
@@ -157,7 +161,7 @@ public class MinesweeperServer {
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         
         // Send hello message immediately after connection.
-        out.println(String.format(HELLO_MESSAGE_FORMAT, board.sizeX(), board.sizeY(), 1)); //TODO placeholder
+        out.println(String.format(HELLO_MESSAGE_FORMAT, board.sizeX(), board.sizeY(), ++numberOfClients));
 
         try {
             for (String line = in.readLine(); line != null; line = in.readLine()) {
@@ -178,6 +182,7 @@ public class MinesweeperServer {
             out.close();
             in.close();
             socket.close();
+            --numberOfClients;
         }
     }
 
