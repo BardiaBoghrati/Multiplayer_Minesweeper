@@ -7,6 +7,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Test;
 
 /**
@@ -573,5 +578,174 @@ public class BoardTest {
         assertEquals("- -\n"+
                      "- -\n", board.toString());
 
+    }
+    
+    /**
+     * Run test n times repeatedly
+     * 
+     * @param test a test to run repeatedly
+     * @param n number of times to run the test
+     */
+    private static void repeat(Runnable test, int n) {
+        for (int i =0; i <= n; i++) {
+            test.run();
+        }
+    }
+    
+    
+    @Test
+    public void testConcurrentDigFlag() {
+        repeat(() -> concurrentDigFlag(), 10000);
+    }
+    
+//    private void concurrentDigFlag() {
+//        try {
+//            Board board = new Board(1, 1, "1\n");
+//            
+//            Thread t1 = new Thread(() -> board.dig(0, 0));
+//            Thread t2 = new Thread(() -> board.flag(0, 0));
+//
+//            t1.start();
+//            t2.start();
+//            t1.join();
+//            t2.join();
+//            
+//            assertTrue("Unexpected outcome", board.toString().equals(" \n") && !board.mined(0, 0)
+//                    || board.toString().equals("F\n") && board.mined(0, 0));
+//        } catch (InterruptedException ie) {
+//            throw new AssertionError("Test interrupted");
+//        }
+//    }
+    
+//    private void concurrentDigFlag() {
+//        try {
+//            Board board = new Board(2, 1, "1 0\n");
+//            board.dig(1, 0);
+//            
+//            Thread t1 = new Thread(() -> board.dig(0, 0));
+//            Thread t2 = new Thread(() -> board.flag(0, 0));
+//
+//            t1.start();
+//            t2.start();
+//            t1.join();
+//            t2.join();
+//            
+//            assertTrue(String.format("Unexpected outcome:%n'%s'", board), 
+//                    board.toString().equals("   \n") || board.toString().equals("F 1\n"));
+//        } catch (InterruptedException ie) {
+//            throw new AssertionError("Test interrupted");
+//        }
+//    }
+    
+    private void concurrentDigFlag() {
+        try {
+            Board board = new Board(1, 1, "1\n");
+            List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
+            
+            Thread t1 = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final boolean explosion = board.dig(0, 0);
+
+                        assertTrue("T1-Unexpected outcome:\n" +
+                                    "State: " + board + "\n" +
+                                    "Mined: " + !explosion, 
+                                   board.toString().equals(" \n") && explosion
+                                || board.toString().equals("F\n") && !explosion);
+                    } catch (Throwable t) {
+                        exceptions.add(t);
+                    }
+                }
+                
+            });
+            
+            Thread t2 = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        board.flag(0, 0);
+
+                        assertTrue("T2-Unexpected outcome:\n" + board,
+                                board.toString().equals(" \n") 
+                             || board.toString().equals("F\n"));
+                    } catch (Throwable t) {
+                        exceptions.add(t);
+                    }
+                }
+                
+            });
+
+            t1.start();
+            t2.start();
+            t1.join();
+            t2.join();
+            
+            assertTrue("Exceptions thrown: " + exceptions, exceptions.isEmpty());
+        } catch (InterruptedException ie) {
+            throw new AssertionError("Test interrupted");
+        }
+    }
+    
+    @Test
+    public void testConcurrentDigLook() {
+        repeat(() -> concurrentDigLook(), 10000);
+    }
+    
+    public void concurrentDigLook() {
+        try {
+            Board board = new Board(3, 3, "0 0 0\n"+
+                                          "0 0 0\n"+
+                                          "0 0 0\n");
+            List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
+            
+            Thread t1 = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        board.dig(0, 0);
+
+                        assertEquals("T1-Unexpected outcome:\n" + board,
+                                     "     \n"+
+                                     "     \n"+
+                                     "     \n", board.toString());
+                    } catch (Throwable t) {
+                        exceptions.add(t);
+                    }
+                }
+                
+            });
+            
+            Thread t2 = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        assertTrue("T2-Unexpected outcome:\n" + board,
+                                   board.toString().equals("- - -\n"+
+                                                           "- - -\n"+
+                                                           "- - -\n")
+                                || board.toString().equals("     \n"+
+                                                           "     \n"+
+                                                           "     \n"));
+                    } catch (Throwable t) {
+                        exceptions.add(t);
+                    }
+                }
+                
+            });
+
+            t1.start();
+            t2.start();
+            t1.join();
+            t2.join();
+            
+            assertTrue("Exceptions thrown: " + exceptions, exceptions.isEmpty());
+        } catch (InterruptedException ie) {
+            throw new AssertionError("Test interrupted");
+        }
     }
 }
