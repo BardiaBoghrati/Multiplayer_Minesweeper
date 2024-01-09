@@ -39,7 +39,7 @@ public class BoardTest {
         
         board.flag(0, 0);
         
-        assertEquals("F\n", board.toString()); 
+        assertEquals("F", board.toString()); 
     }
     
     @Test
@@ -49,7 +49,7 @@ public class BoardTest {
         
         board.flag(0, 0);
         
-        assertEquals("F\n", board.toString()); 
+        assertEquals("F", board.toString()); 
     }
     
     @Test
@@ -59,7 +59,7 @@ public class BoardTest {
         
         board.flag(0, 0);
         
-        assertEquals(" \n", board.toString()); 
+        assertEquals(" ", board.toString()); 
     }
     
     @Test
@@ -68,7 +68,7 @@ public class BoardTest {
         
         board.deflag(0, 0);
         
-        assertEquals("-\n", board.toString()); 
+        assertEquals("-", board.toString()); 
     }
     
     @Test
@@ -78,7 +78,7 @@ public class BoardTest {
         
         board.deflag(0, 0);
         
-        assertEquals("-\n", board.toString()); 
+        assertEquals("-", board.toString()); 
     }
     
     @Test
@@ -88,7 +88,7 @@ public class BoardTest {
         
         board.deflag(0, 0);
         
-        assertEquals(" \n", board.toString()); 
+        assertEquals(" ", board.toString()); 
     }
     
     @Test
@@ -100,7 +100,7 @@ public class BoardTest {
         
         board.dig(0, 0);
         
-        assertEquals("  -\n", board.toString()); 
+        assertEquals("  -", board.toString()); 
     }
     
     @Test
@@ -110,7 +110,7 @@ public class BoardTest {
         
         board.dig(0, 0);
         
-        assertEquals("F\n", board.toString());  
+        assertEquals("F", board.toString());  
     }
     
     @Test
@@ -120,7 +120,7 @@ public class BoardTest {
         
         board.dig(1, 0);
         
-        assertEquals("F 1 -\n", board.toString());  
+        assertEquals("F 1 -", board.toString());  
     }
     
     @Test
@@ -129,7 +129,7 @@ public class BoardTest {
         
         board.dig(0, 0);
         
-        assertEquals(" \n", board.toString());
+        assertEquals(" ", board.toString());
     }
     
 //    @Test
@@ -175,7 +175,7 @@ public class BoardTest {
         
         assertEquals("   \n"+
                      "F F\n"+
-                     "- -\n", board.toString());
+                     "- -", board.toString());
         
         //Expansion not walled in by flagged neighbors
         board = new Board(2, 3, "0 0\n"+
@@ -187,7 +187,7 @@ public class BoardTest {
         
         assertEquals("   \n"+
                      "  F\n"+
-                     "   \n", board.toString());
+                     "   ", board.toString());
     }
     
 //    @Test
@@ -218,21 +218,21 @@ public class BoardTest {
         
         board.dig(0, 0);
         
-        assertEquals("     \n", board.toString());
+        assertEquals("     ", board.toString());
         
         //Dig square one square to a bomb
         board = new Board(3, 1, "1 0 0\n");
         
         board.dig(1, 0);
         
-        assertEquals("- 1 -\n", board.toString());
+        assertEquals("- 1 -", board.toString());
         
         //Dig square two squares from a bomb
         board = new Board(3, 1, "1 0 0\n");
         
         board.dig(2, 0);
         
-        assertEquals("- 1  \n", board.toString());
+        assertEquals("- 1  ", board.toString());
     }
     
     @Test
@@ -241,7 +241,7 @@ public class BoardTest {
 
         board.dig(1, 0);
         
-        assertEquals("     \n", board.toString());
+        assertEquals("     ", board.toString());
     }
     
     @Test
@@ -253,7 +253,7 @@ public class BoardTest {
         
         assertEquals(" \n"+
                      " \n"+
-                     " \n", board.toString());
+                     " ", board.toString());
     }
     
     @Test
@@ -270,7 +270,7 @@ public class BoardTest {
         
         assertEquals("  F  \n"+
                      "F   F\n"+
-                     "  F  \n", board.toString());
+                     "  F  ", board.toString());
     }
     
     
@@ -282,22 +282,22 @@ public class BoardTest {
         board.dig(0, 0);
         
         assertEquals("3 -\n"+
-                     "- -\n", board.toString());
+                     "- -", board.toString());
         
         board.dig(1, 1);
         
         assertEquals("2 -\n"+
-                     "- 2\n", board.toString());
+                     "- 2", board.toString());
         
         board.dig(1, 0);
         
         assertEquals("1 1\n"+
-                     "- 1\n", board.toString());
+                     "- 1", board.toString());
         
         board.dig(0, 1);
         
         assertEquals("   \n"+
-                     "   \n", board.toString());
+                     "   ", board.toString());
     }
     
 //    @Test
@@ -328,7 +328,7 @@ public class BoardTest {
         
         board.dig(0, 0);
         
-        assertEquals("    -\n", board.toString());
+        assertEquals("    -", board.toString());
     }
     
     @Test
@@ -341,7 +341,7 @@ public class BoardTest {
         
         assertEquals("     \n"+
                      "     \n"+
-                     "     \n", board.toString());
+                     "     ", board.toString());
     }
     
     @Test
@@ -354,44 +354,44 @@ public class BoardTest {
         
         assertEquals("1 - -\n"+
                      "- - -\n"+
-                     "- - -\n", board.toString());
+                     "- - -", board.toString());
         board.dig(1, 0);
         
         assertEquals("1 1 -\n"+
                      "- - -\n"+
-                     "- - -\n", board.toString());
+                     "- - -", board.toString());
         board.dig(2, 0);
         
         assertEquals("1 1 1\n"+
                      "- - -\n"+
-                     "- - -\n", board.toString());
+                     "- - -", board.toString());
         board.dig(2, 1);
         
         assertEquals("1 1 1\n"+
                      "- - 1\n"+
-                     "- - -\n", board.toString());
+                     "- - -", board.toString());
         board.dig(2, 2);
         
         assertEquals("1 1 1\n"+
                      "- - 1\n"+
-                     "- - 1\n", board.toString());
+                     "- - 1", board.toString());
         board.dig(1, 2);
         
         assertEquals("1 1 1\n"+
                      "- - 1\n"+
-                     "- 1 1\n", board.toString());
+                     "- 1 1", board.toString());
         
         board.dig(0, 2);
         
         assertEquals("1 1 1\n"+
                      "- - 1\n"+
-                     "1 1 1\n", board.toString());
+                     "1 1 1", board.toString());
         
         board.dig(0, 1);
         
         assertEquals("1 1 1\n"+
                      "1 - 1\n"+
-                     "1 1 1\n", board.toString());
+                     "1 1 1", board.toString());
     }
     
     @Test
@@ -405,7 +405,7 @@ public class BoardTest {
         
         assertEquals("     \n"+
                      "  F  \n"+
-                     "     \n", board.toString());
+                     "     ", board.toString());
     }
     
     @Test
@@ -414,7 +414,7 @@ public class BoardTest {
         
         board.dig(1, 0);
         
-        assertEquals("- 1\n", board.toString());
+        assertEquals("- 1", board.toString());
     }
     
     @Test
@@ -423,7 +423,7 @@ public class BoardTest {
         
         board.flag(1, 0);
         
-        assertEquals("- F\n", board.toString());
+        assertEquals("- F", board.toString());
     }
     
     @Test
@@ -433,7 +433,7 @@ public class BoardTest {
         
         board.deflag(1, 0);
         
-        assertEquals("- -\n", board.toString());
+        assertEquals("- -", board.toString());
     }
     
     @Test
@@ -442,19 +442,19 @@ public class BoardTest {
         
         board.dig(-1, 0);
         
-        assertEquals("-\n", board.toString());
+        assertEquals("-", board.toString());
         
         board.dig(1, 0);
         
-        assertEquals("-\n", board.toString());
+        assertEquals("-", board.toString());
         
         board.dig(0, -1);
         
-        assertEquals("-\n", board.toString());
+        assertEquals("-", board.toString());
         
         board.dig(0, 1);
         
-        assertEquals("-\n", board.toString());
+        assertEquals("-", board.toString());
     }
     
     @Test
@@ -463,19 +463,19 @@ public class BoardTest {
         
         board.flag(-1, 0);
         
-        assertEquals("-\n", board.toString());
+        assertEquals("-", board.toString());
         
         board.flag(1, 0);
         
-        assertEquals("-\n", board.toString());
+        assertEquals("-", board.toString());
         
         board.flag(0, -1);
         
-        assertEquals("-\n", board.toString());
+        assertEquals("-", board.toString());
         
         board.flag(0, 1);
         
-        assertEquals("-\n", board.toString());
+        assertEquals("-", board.toString());
     }
     
     @Test
@@ -485,19 +485,19 @@ public class BoardTest {
         
         board.deflag(-1, 0);
         
-        assertEquals("F\n", board.toString());
+        assertEquals("F", board.toString());
         
         board.deflag(1, 0);
         
-        assertEquals("F\n", board.toString());
+        assertEquals("F", board.toString());
         
         board.deflag(0, -1);
         
-        assertEquals("F\n", board.toString());
+        assertEquals("F", board.toString());
         
         board.deflag(0, 1);
         
-        assertEquals("F\n", board.toString());
+        assertEquals("F", board.toString());
     }
     
     @Test
@@ -510,7 +510,7 @@ public class BoardTest {
         assertEquals("- -\n"+
                      "- -\n"+
                      "- -\n"+
-                     "- -\n", board.toString());
+                     "- -", board.toString());
     }
     
     @Test
@@ -542,7 +542,7 @@ public class BoardTest {
         Board board = new Board(5, 1, "0 0 1 0 1\n");
         
         assertTrue(board.dig(2, 0));
-        assertEquals("      1 -\n", board.toString());
+        assertEquals("      1 -", board.toString());
 
     }
     
@@ -554,13 +554,13 @@ public class BoardTest {
         
         assertEquals(1, board.sizeX());
         assertEquals(1, board.sizeY());
-        assertEquals("-\n", board.toString());
+        assertEquals("-", board.toString());
         
         board = new Board(2, 1, "0 0\n");
         
         assertEquals(2, board.sizeX());
         assertEquals(1, board.sizeY());
-        assertEquals("- -\n", board.toString());
+        assertEquals("- -", board.toString());
         
         board = new Board(1, 2, "0\n"+
                                 "0\n");
@@ -568,7 +568,7 @@ public class BoardTest {
         assertEquals(1, board.sizeX());
         assertEquals(2, board.sizeY());
         assertEquals("-\n"+
-                     "-\n", board.toString());
+                     "-", board.toString());
         
         board = new Board(2, 2, "0 0\n"+
                                 "0 0\n");
@@ -576,7 +576,7 @@ public class BoardTest {
         assertEquals(2, board.sizeX());
         assertEquals(2, board.sizeY());
         assertEquals("- -\n"+
-                     "- -\n", board.toString());
+                     "- -", board.toString());
 
     }
     
@@ -652,8 +652,8 @@ public class BoardTest {
                         assertTrue("T1-Unexpected outcome:\n" +
                                     "State: " + board + "\n" +
                                     "Mined: " + !explosion, 
-                                   board.toString().equals(" \n") && explosion
-                                || board.toString().equals("F\n") && !explosion);
+                                   board.toString().equals(" ") && explosion
+                                || board.toString().equals("F") && !explosion);
                     } catch (Throwable t) {
                         exceptions.add(t);
                     }
@@ -669,8 +669,8 @@ public class BoardTest {
                         board.flag(0, 0);
 
                         assertTrue("T2-Unexpected outcome:\n" + board,
-                                board.toString().equals(" \n") 
-                             || board.toString().equals("F\n"));
+                                board.toString().equals(" ") 
+                             || board.toString().equals("F"));
                     } catch (Throwable t) {
                         exceptions.add(t);
                     }
@@ -711,7 +711,7 @@ public class BoardTest {
                         assertEquals("T1-Unexpected outcome:\n" + board,
                                      "     \n"+
                                      "     \n"+
-                                     "     \n", board.toString());
+                                     "     ", board.toString());
                     } catch (Throwable t) {
                         exceptions.add(t);
                     }
@@ -727,10 +727,10 @@ public class BoardTest {
                         assertTrue("T2-Unexpected outcome:\n" + board,
                                    board.toString().equals("- - -\n"+
                                                            "- - -\n"+
-                                                           "- - -\n")
+                                                           "- - -")
                                 || board.toString().equals("     \n"+
                                                            "     \n"+
-                                                           "     \n"));
+                                                           "     "));
                     } catch (Throwable t) {
                         exceptions.add(t);
                     }

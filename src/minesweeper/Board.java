@@ -139,7 +139,7 @@ public class Board {
      *            y-coordinate of the square
      * @return true if square x,y is in bound and contains a bomb
      */
-    private boolean mined(int x, int y){
+    boolean mined(int x, int y){
         if(inBound(x, y)) {
             return board[y][x].mined(); 
         }
@@ -315,6 +315,8 @@ public class Board {
                 sb.append(i == sizeX - 1 ? "\n" : " ");
             }
         }
+        
+        sb.deleteCharAt(sb.length()-1); //Delete the last new-line char (\n)
 
         return sb.toString();
     }

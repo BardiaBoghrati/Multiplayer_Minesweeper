@@ -202,7 +202,7 @@ public class MinesweeperServer {
         String[] tokens = input.split(" ");
         if (tokens[0].equals("look")) {
             // 'look' request
-            return board.toString().replaceAll("\n$", "");
+            return board.toString();
         } else if (tokens[0].equals("help")) {
             // 'help' request
             return HELP_MESSAGE;
@@ -214,15 +214,15 @@ public class MinesweeperServer {
             int y = Integer.parseInt(tokens[2]);
             if (tokens[0].equals("dig")) {
                 // 'dig x y' request
-                return board.dig(x, y) ? BOOM_MESSAGE : board.toString().replaceAll("\n$", "");
+                return board.dig(x, y) ? BOOM_MESSAGE : board.toString();
             } else if (tokens[0].equals("flag")) {
                 // 'flag x y' request
                 board.flag(x, y);
-                return board.toString().replaceAll("\n$", "");
+                return board.toString();
             } else if (tokens[0].equals("deflag")) {
                 // 'deflag x y' request
                 board.deflag(x, y);
-                return board.toString().replaceAll("\n$", "");
+                return board.toString();
             }
         }
         // TODO: Should never get here, make sure to return in each of the cases above
