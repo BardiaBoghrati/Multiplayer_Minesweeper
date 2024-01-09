@@ -10,7 +10,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -748,4 +750,122 @@ public class BoardTest {
             throw new AssertionError("Test interrupted");
         }
     }
+    
+    @Test
+    public void testConcurrentDigs() {
+        repeat(() -> concurrentDigs(), 10000);
+    }
+    
+    public void concurrentDigs() {
+        try {
+            Board board = new Board(1, 1, "1\n");
+            List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
+            Map<Thread, Boolean> explosions = Collections.synchronizedMap(new HashMap<>());
+            
+            Thread t1 = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final boolean explosion = board.dig(0, 0);
+                        explosions.put(Thread.currentThread(), explosion);
+
+                        assertTrue("T1-Unexpected outcome:\n" +
+                                   "State: " + board + "\n", 
+                                   board.toString().equals(" "));
+                    } catch (Throwable t) {
+                        exceptions.add(t);
+                    }
+                }
+                
+            });
+            
+            Thread t2 = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final boolean explosion = board.dig(0, 0);
+                        explosions.put(Thread.currentThread(), explosion);
+
+                        assertTrue("T2-Unexpected outcome:\n" +
+                                   "State: " + board + "\n", 
+                                   board.toString().equals(" "));
+                    } catch (Throwable t) {
+                        exceptions.add(t);
+                    }
+                }
+                
+            });
+
+            t1.start();
+            t2.start();
+            t1.join();
+            t2.join();
+            
+            assertTrue("Exceptions thrown: " + exceptions, exceptions.isEmpty());
+            assertFalse("Cannot have two explosions on the same square", explosions.get(t1) && explosions.get(t2));
+        } catch (InterruptedException ie) {
+            throw new AssertionError("Test interrupted");
+        }
+    }
+    
+    @Test
+    public void testConcurrentCount() {
+        repeat(() -> concurrentCount(), 10000);
+    }
+    
+    public void concurrentCount() {
+        try {
+            Board board = new Board(3, 1, "1 0 1\n");
+            board.dig(1, 0);
+            
+            List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
+            
+            Thread t1 = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        board.dig(0, 0);
+
+                        assertTrue("T1-Unexpected outcome:\n" +
+                                   "State: " + board + "\n", 
+                                   board.toString().equals("  1 -") 
+                                || board.toString().equals("     "));
+                    } catch (Throwable t) {
+                        exceptions.add(t);
+                    }
+                }
+                
+            });
+            
+            Thread t2 = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        board.dig(2, 0);
+
+                        assertTrue("T2-Unexpected outcome:\n" +
+                                   "State: " + board + "\n", 
+                                   board.toString().equals("- 1  ") 
+                                || board.toString().equals("     "));
+                    } catch (Throwable t) {
+                        exceptions.add(t);
+                    }
+                }
+                
+            });
+
+            t1.start();
+            t2.start();
+            t1.join();
+            t2.join();
+            
+            assertTrue("Exceptions thrown: " + exceptions, exceptions.isEmpty());
+        } catch (InterruptedException ie) {
+            throw new AssertionError("Test interrupted");
+        }
+    }    
 }
