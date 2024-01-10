@@ -101,29 +101,6 @@ public class MinesweeperServerTest {
         }
     }
     
-//    @Test
-//    public void test() throws IOException {
-//
-//        MinesweeperServer server = new MinesweeperServer(0, true, new File("test/boards/board.txt"));
-//        Thread serverThread = new Thread(()-> server.serve());
-//        serverThread.start();
-//        
-//        MinesweeperClient client1 = new MinesweeperClient(serverThread, server.port());
-//        MinesweeperClient client2 = new MinesweeperClient(serverThread, server.port());
-//        
-//        new Thread(()-> client1.writeln("look")).start();
-//        new Thread(()-> client2.writeln("look")).start();
-//        
-//        assertTrue("expected HELLO message", client1.readln().startsWith("Welcome"));
-//        
-//        assertEquals("excpteded", "3 -", client1.readln());
-//        assertEquals("excpteded", "- -", client1.readln());
-//        
-//        
-//        server.terminate();
-//        client1.close();
-//        client2.close();
-//    }
     @Test
     public void testInvalidMessageType() throws IOException {
         MinesweeperServer server = new MinesweeperServer(0, true, 10, 10);
@@ -1014,4 +991,127 @@ public class MinesweeperServerTest {
         server.terminate();
         client.terminate(); 
     }
+    
+    /**
+     * Run test n times repeatedly
+     * 
+     * @param test a test to run repeatedly
+     * @param n number of times to run the test
+     */
+    private static void repeat(Runnable test, int n) {
+        for (int i =0; i <= n; i++) {
+            test.run();
+        }
+    }
+    
+    @Test
+    public void testConcurrentDigFlag() {
+        repeat(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    concurrentDigFlag();
+                } catch (Throwable e) {
+                    throw new AssertionError("Test failure", e);
+                }
+            }
+            
+        }, 1000);
+    }
+    
+    private void concurrentDigFlag() throws IOException {
+        MinesweeperServer server = new MinesweeperServer(0, true, new File("boards/1x1-(0,0).txt"));
+        Thread serverThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    server.serve();
+                } catch (IOException e) {
+                    // e.printStackTrace();
+                }
+            }
+        });
+        serverThread.start();
+
+        MinesweeperClient client1 = new MinesweeperClient(serverThread, server.port());
+        MinesweeperClient client2 = new MinesweeperClient(serverThread, server.port());
+
+        assertTrue(client1.readln().startsWith("Welcome"));
+        assertTrue(client2.readln().startsWith("Welcome"));
+
+        new Thread(() -> client1.write("dig 0 0\n")).start();
+        new Thread(() -> client2.write("flag 0 0\n")).start();
+
+        String message1 = client1.readln();
+        String message2 = client2.readln();
+
+        assertTrue(String.format("Unexpected outcome:%nMessage to client1:%n%s%nMessage to client 2:%n%s", message1, message2),
+                   message1.equals(MinesweeperServer.BOOM_MESSAGE) && message2.equals(" ")
+                || message1.equals("F") && message2.equals("F"));
+
+        server.terminate();
+        client1.terminate();
+        client2.terminate();
+    }
+    
+    @Test
+    public void testConcurrentDigLook() {
+        repeat(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    concurrentDigLook();
+                } catch (Throwable e) {
+                    throw new AssertionError("Test failure", e);
+                }
+            }
+            
+        }, 1000);
+    }
+    
+    private void concurrentDigLook() throws IOException {
+        MinesweeperServer server = new MinesweeperServer(0, true, new File("boards/3x3.txt"));
+        Thread serverThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    server.serve();
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            }
+        });
+        serverThread.start();
+        
+        MinesweeperClient client1 = new MinesweeperClient(serverThread, server.port());
+        MinesweeperClient client2 = new MinesweeperClient(serverThread, server.port());
+        
+        assertTrue(client1.readln().startsWith("Welcome"));
+        assertTrue(client2.readln().startsWith("Welcome"));
+        
+        new Thread(() -> client1.write("dig 0 0\n")).start();;
+        new Thread(() -> client2.write("look\n")).start();
+        
+        String message1 = String.format("%s\n%s\n%s", client1.readln(), client1.readln(), client1.readln());
+        String message2 = String.format("%s\n%s\n%s", client2.readln(), client2.readln(), client2.readln());
+
+        assertTrue(String.format("Unexpected outcome:%nMessage to client1:%n%s%nMessage to client 2:%n%s", message1, message2),
+                   message1.equals("     \n"+
+                                   "     \n"+
+                                   "     ") && 
+                  (message2.equals("     \n"+
+                                   "     \n"+
+                                   "     ") || 
+                   message2.equals("- - -\n"+
+                                   "- - -\n"+
+                                   "- - -")));
+        
+        server.terminate();
+        client1.terminate();
+        client2.terminate();
+    }    
 }
