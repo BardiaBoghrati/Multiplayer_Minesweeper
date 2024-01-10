@@ -336,7 +336,7 @@ public class MinesweeperServerTest {
          * 2 1
          * 0 0
          */
-        MinesweeperServer server = new MinesweeperServer(0, true, new File("boards/2x1.txt"));
+        MinesweeperServer server = new MinesweeperServer(0, false, new File("boards/2x1-(0,0).txt"));
         Thread serverThread = new Thread(new Runnable() {
 
             @Override
@@ -350,13 +350,32 @@ public class MinesweeperServerTest {
         });
         serverThread.start();
 
-        MinesweeperClient client = new MinesweeperClient(serverThread, server.port());
-
+        MinesweeperClient client1 = new MinesweeperClient(serverThread, server.port());
+        
         assertEquals("expected HELLO message", String.format(MinesweeperServer.HELLO_MESSAGE_FORMAT, 2, 1, 1),
-                client.readln());
+                client1.readln());
+        
+        MinesweeperClient client2 = new MinesweeperClient(serverThread, server.port());
+        
+        assertEquals("expected HELLO message", String.format(MinesweeperServer.HELLO_MESSAGE_FORMAT, 2, 1, 2),
+                client2.readln());
+        
+        client1.write("bye\n");
+        client2.write("dig 0 0\n");
+        
+        assertEquals("Expected end of stream", null, client1.readln());
+        assertEquals(MinesweeperServer.BOOM_MESSAGE, client2.readln());
+        assertEquals("Expected end of stream", null, client2.readln());
+        
+        MinesweeperClient client3 = new MinesweeperClient(serverThread, server.port());
+        
+        assertEquals("expected HELLO message", String.format(MinesweeperServer.HELLO_MESSAGE_FORMAT, 2, 1, 1),
+                client3.readln());
 
         server.terminate();
-        client.terminate();
+        client1.terminate();
+        client2.terminate();
+        client3.terminate();
     }
     
     @Test
