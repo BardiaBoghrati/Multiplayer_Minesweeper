@@ -13,6 +13,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.junit.Test;
 
@@ -1132,5 +1137,107 @@ public class MinesweeperServerTest {
         server.terminate();
         client1.terminate();
         client2.terminate();
-    }    
+    }
+    
+    private static class Result<T> {
+        private T result;
+        private Throwable exception;
+        
+        Result(T result) {
+            this.result = result;
+        }
+        
+        Result(Throwable exception) {
+            this.exception = exception;
+        }
+        
+        T getResult() throws Throwable {
+            if (result != null) {
+                return result;
+            }
+            
+            throw exception;
+        }
+    }
+    
+    /**
+     * Starts a thread that constructs a MinesweeperClient and places it the
+     * results queue
+     * 
+     * @param serverThread
+     *            The thread running the server
+     * @param port
+     *            The port number on which the server is listening
+     * @param results
+     *            The queue in which the results of the construction are placed
+     * @return The thread which is constructing the client
+     */
+    private static Thread startMinesweeperClientConstructor(Thread serverThread, int port, BlockingQueue<Result<MinesweeperClient>> results) {
+        Thread constructor = new Thread(new Runnable() {
+            
+            @Override
+            public void run() {
+                try {
+                    results.add(new Result<MinesweeperClient>(new MinesweeperClient(serverThread, port)));
+                } catch (Throwable e) {
+                    results.add(new Result<MinesweeperClient>(e));
+                }
+            }
+        });
+        
+        constructor.start();
+        return constructor;
+    }
+    
+    private static Thread start(MinesweeperServer server) {
+        Thread serverThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    server.serve();
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            }
+        });
+        
+        serverThread.start();
+        return serverThread;
+    }
+    
+    @Test
+    public void testConcurrentConnections() {
+        repeat(() -> concurrentConnections(), 1000);
+    }
+    
+    private void concurrentConnections() {
+        try {
+            MinesweeperServer server = new MinesweeperServer(0, false, new File("boards/2x1.txt"));
+            Thread serverThread = start(server);
+            
+            BlockingQueue<Result<MinesweeperClient>> results = new ArrayBlockingQueue<>(2);
+            
+            startMinesweeperClientConstructor(serverThread, server.port(), results);
+            startMinesweeperClientConstructor(serverThread, server.port(), results);
+            
+            MinesweeperClient client1 = results.take().getResult();
+            MinesweeperClient client2 = results.take().getResult();
+            client1.readln(); client2.readln(); // await response from server for both clients
+            
+            MinesweeperClient client3 = new MinesweeperClient(serverThread, server.port());
+            String helloMessage = client3.readln();
+            
+            assertEquals(String.format(MinesweeperServer.HELLO_MESSAGE_FORMAT, 2, 1, 3), helloMessage);
+            
+            server.terminate();
+            client1.terminate();
+            client2.terminate();
+            client3.terminate();
+        } catch (InterruptedException e) {
+            throw new AssertionError("Test interrupted");
+        } catch (Throwable e) {
+            throw new AssertionError("Test failure", e);
+        }
+    }
 }
