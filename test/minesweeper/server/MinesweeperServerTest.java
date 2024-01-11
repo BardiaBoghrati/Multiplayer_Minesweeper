@@ -1240,4 +1240,37 @@ public class MinesweeperServerTest {
             throw new AssertionError("Test failure", e);
         }
     }
+    
+    @Test
+    public void testConcurrentDisconnections() {
+        repeat(() -> concurrentDisconnections(), 1000);
+    }
+    
+    private void concurrentDisconnections() {
+        try {
+            MinesweeperServer server = new MinesweeperServer(0, false, new File("boards/2x1.txt"));
+            Thread serverThread = start(server);
+            
+            MinesweeperClient client1 = new MinesweeperClient(serverThread, server.port());
+            MinesweeperClient client2 = new MinesweeperClient(serverThread, server.port());
+            client1.readln(); client2.readln(); // skip
+            
+            new Thread(() -> client1.write("bye\n")).start();
+            new Thread(() -> client2.write("bye\n")).start();
+            assertEquals("Expected end of stream", null, client1.readln());
+            assertEquals("Expected end of stream", null, client2.readln());
+            
+            MinesweeperClient client3 = new MinesweeperClient(serverThread, server.port());
+            String helloMessage = client3.readln();
+            
+            assertEquals(String.format(MinesweeperServer.HELLO_MESSAGE_FORMAT, 2, 1, 1), helloMessage);
+            
+            server.terminate();
+            client1.terminate();
+            client2.terminate();
+            client3.terminate();
+        } catch (Throwable e) {
+            throw new AssertionError("Test failure", e);
+        }
+    }
 }
