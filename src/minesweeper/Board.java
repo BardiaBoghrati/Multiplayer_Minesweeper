@@ -21,8 +21,23 @@ public class Board {
 
     // TODO: Abstraction function, rep invariant, rep exposure, thread safety
     // Rep invariant:
+    //  board must be of dimensions sizeY by sizeX. A Square cannot be dug
+    //  and mined at same time.
     // Abstract function:
+    //  board, dimensions sizeY by sizeX, represents a sizeX by sizeY grid of
+    //  squares where board[y][x] represents square x,y on the axis defined in
+    //  the spec. Each Square board[y][x] corresponds to the following values:
+    //  - If board[y][x] is dug with no mined neighbors ---> square x,y is dug
+    //  and is denoted by " " (single-space).
+    //  - If board[y][x] is dug with mined neighbors ---> square x,y is dug and
+    //  is denoted by an integer value between 1-8 counting the number of mined
+    //  neighbors.
+    //  - If board[y][x] is flagged ---> square x,y is also flagged and denoted
+    //  with "F".
+    //  - If board[y][x] is untouched ---> square x,y is also untouched and
+    //  denoted with "-".
     // Rep Exposure:
+    //  Only exposed parts of the rep--sizeX and sizeY--are immutable.
     
     // TODO: Specify, test, and implement in problem 2
     
