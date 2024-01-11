@@ -5,7 +5,8 @@ package minesweeper;
 
 /**
  * A minesweeper board is a grid of squares. Each square is either flagged, dug,
- * or untouched. Each square also contains a bomb or does not contain a bomb.
+ * or untouched. Each square is also either mined or not mined. Every dug
+ * square contains a count of its mined neighbors.
  * <p>
  * The axis of the board is defined with (x,y) coordinates starting at (0,0) in
  * the top-left corner, extending horizontally to the right in the x-direction,
@@ -19,7 +20,6 @@ public class Board {
     private final int sizeX;
     private final int sizeY;
 
-    // TODO: Abstraction function, rep invariant, rep exposure, thread safety
     // Rep invariant:
     //  board must be of dimensions sizeY by sizeX. A Square cannot be dug
     //  and mined at same time.
@@ -28,10 +28,9 @@ public class Board {
     //  squares where board[y][x] represents square x,y on the axis defined in
     //  the spec. Each Square board[y][x] corresponds to the following values:
     //  - If board[y][x] is dug with no mined neighbors ---> square x,y is dug
-    //  and is denoted by " " (single-space).
-    //  - If board[y][x] is dug with mined neighbors ---> square x,y is dug and
-    //  is denoted by an integer value between 1-8 counting the number of mined
-    //  neighbors.
+    //  with a mined neighbor count of zero.
+    //  - If board[y][x] is dug with mined neighbors ---> square x,y is dug with
+    //  a count 1-8 of its mined neighbors.
     //  - If board[y][x] is flagged ---> square x,y is also flagged and denoted
     //  with "F".
     //  - If board[y][x] is untouched ---> square x,y is also untouched and
@@ -43,7 +42,6 @@ public class Board {
     //  - sizeX and sizeY are immutable and final.
     //  - All access to the mutable rep, board, is guarded by this object's lock.
     
-    // TODO: Specify, test, and implement in problem 2
     
     private static class Square {
         private boolean mined;
