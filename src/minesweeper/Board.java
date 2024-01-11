@@ -36,8 +36,12 @@ public class Board {
     //  with "F".
     //  - If board[y][x] is untouched ---> square x,y is also untouched and
     //  denoted with "-".
-    // Rep Exposure:
+    // Rep exposure:
     //  Only exposed parts of the rep--sizeX and sizeY--are immutable.
+    // Thread safety argument:
+    //  - No rep exposure.
+    //  - sizeX and sizeY are immutable and final.
+    //  - All access to the mutable rep, board, is guarded by this object's lock.
     
     // TODO: Specify, test, and implement in problem 2
     
@@ -243,7 +247,7 @@ public class Board {
      *            the y-coordinate of the square in the board.
      * @return true if a mine exploded
      */
-    public boolean dig(int x, int y) {
+    public synchronized boolean dig(int x, int y) {
         if (!inBound(x, y) || board[y][x].state() != Square.State.Untouched) {
             return false;
         }
@@ -272,7 +276,7 @@ public class Board {
      * @param y
      *            the y-coordinate of the square in the board.
      */
-    public void flag(int x, int y) {
+    public synchronized void flag(int x, int y) {
         if (inBound(x, y)) {
             board[y][x].flag();
         }
@@ -287,7 +291,7 @@ public class Board {
      * @param y
      *            the y-coordinate of the square in the board.
      */
-    public void deflag(int x, int y) {
+    public synchronized void deflag(int x, int y) {
         if (inBound(x, y)) {
             board[y][x].deflag();
         }
@@ -307,7 +311,7 @@ public class Board {
      * </ul>
      */
     @Override
-    public String toString() {
+    public synchronized String toString() {
         StringBuilder sb = new StringBuilder();
 
         for (int j = 0; j < sizeY; j++) {
