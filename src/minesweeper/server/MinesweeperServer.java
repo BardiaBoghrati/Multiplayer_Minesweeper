@@ -396,10 +396,12 @@ public class MinesweeperServer {
      * @throws IOException if a network error occurs
      */
     public static void runMinesweeperServer(boolean debug, Optional<File> file, int sizeX, int sizeY, int port) throws IOException {
-        
-        // TODO: Continue implementation here in problem 4
-        
-        MinesweeperServer server = new MinesweeperServer(port, debug, sizeX, sizeY);
-        server.serve();
+        if (file.isPresent()) {
+            MinesweeperServer server = new MinesweeperServer(port, debug, file.get());
+            server.serve();
+        } else {
+            MinesweeperServer server = new MinesweeperServer(port, debug, sizeX, sizeY);
+            server.serve();
+        }
     }
 }
