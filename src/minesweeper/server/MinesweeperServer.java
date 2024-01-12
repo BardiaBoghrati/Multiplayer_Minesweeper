@@ -15,7 +15,38 @@ import minesweeper.Board;
 public class MinesweeperServer {
 
     // System thread safety argument
-    //   TODO Problem 5
+    //   It is unclear to me whether ServerSocket is threadsafe. Regardless, having
+    //   multiple threads listing on the same port for connections make no sense.
+    //   In our design client connection are handle by separate threads from the
+    //   main server listening thread.
+    //
+    //   Allowing multiple threads to run the server can be problematic, as one can imagine
+    //   it might cause multiple client threads to receive the same client socket causing
+    //   duplicate communication and modification. We avoid these possible sort of
+    //   race conditions by allowing only one thread--the main server listing thread--
+    //   to run server(). This is achieved by synchronizing server() on this server's lock.
+    //   We still allow other threads to terminate the server because, as ServerSocket's
+    //   spec suggests, close() can be called while another thread is blocked on accept().
+    //
+    //   As I mentioned each connected client socket is confined to its own thread, as a 
+    //   result all communication with the client is also confined to that thread.
+    //
+    //   As clients connect and disconnect from the server, the number of connected clients 
+    //   is tracked through numberOfClients. All modifications/writes to this variable is
+    //   synchronized via the same lock--not the same as the sever's lock which is held by
+    //   the server thread. However, reading of this variable is unguarded. On connection
+    //   to the server, the client handler will send a hello message containing the number
+    //   of active players (clients) in the game. Suppose, numberOfClients is modified while
+    //   sending the hello message, that means the message sent may not reflect the actual
+    //   number of clients, but that is fine because what the client sees in the hello message
+    //   is consistent with some occurrence of events relative to their connection; other 
+    //   clients either connected or disconnected before or after their connection.
+    //
+    //   The minesweeper board is a threadsafe data type; it is safe for concurrent modification
+    //   by multiple clients. Request-response associated with board's operations also satisfy 
+    //   serializability; the possible interleaving between the time of a mutating operation 
+    //   (dig, flag, deflag) on the board and obtaining the observable state (via toString()) 
+    //   doesn't threaten the consistency of the observed result by the client.
 
     /** Default server port. */
     private static final int DEFAULT_PORT = 4444;
@@ -35,6 +66,9 @@ public class MinesweeperServer {
     static final String HELP_MESSAGE = "Usage: 'look' | 'help' | 'bye' | '(dig | flag | deflag) X Y' where X Y are integers";
     /** BOOM message*/
     static final String BOOM_MESSAGE = "BOOM!";
+    
+    /** Synchronization lock. */
+    private final Object lock = new Object();
 
     /** Socket for receiving incoming connections. */
     private final ServerSocket serverSocket;
@@ -118,12 +152,13 @@ public class MinesweeperServer {
 
     /**
      * Run the server, listening for client connections and handling them.
-     * Never returns unless an exception is thrown.
+     * Never returns unless an exception is thrown. Only a single thread can
+     * run this server at a time.
      * 
      * @throws IOException if the main server socket is broken or the server has been terminated
      *                     (IOExceptions from individual clients do *not* terminate serve())
      */
-    public void serve() throws IOException {
+    public synchronized void serve() throws IOException {
         while (true) {
             // block until a client connects
             final Socket socket = serverSocket.accept();
@@ -168,8 +203,10 @@ public class MinesweeperServer {
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         
+        synchronized(lock) {++numberOfClients;}
+        
         // Send hello message immediately after connection.
-        out.println(String.format(HELLO_MESSAGE_FORMAT, board.sizeX(), board.sizeY(), ++numberOfClients));
+        out.println(String.format(HELLO_MESSAGE_FORMAT, board.sizeX(), board.sizeY(), numberOfClients));
 
         try {
             for (String line = in.readLine(); line != null; line = in.readLine()) {
@@ -190,7 +227,7 @@ public class MinesweeperServer {
             out.close();
             in.close();
             socket.close();
-            --numberOfClients;
+            synchronized(lock) {--numberOfClients;}
         }
     }
 
