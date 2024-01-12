@@ -44,8 +44,15 @@ public class MinesweeperServer {
     private int numberOfClients;
     /** Minesweeper board*/
     private final Board board;
-
-    // TODO: Abstraction function, rep invariant, rep exposure
+    
+    // Rep invariant:
+    //  numberOfClients counts the number of connected clients--the number of
+    //  active client threads.
+    // Abstract function:
+    //  A server listing to serverSocket.getLocalPort() with numberOfClients
+    //  connected clients interacting with board.
+    // Rep exposure:
+    //  No part of the rep is exposed to clients.
     
     /**
      * Make a MinesweeperServer, initialized with a random board of sizeX by
@@ -89,6 +96,7 @@ public class MinesweeperServer {
         this.debug = debug;
         numberOfClients = 0;
         
+        //TODO Do I need to separate BufferedReader and FileReader in the try-with-resources statement?
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
             String[] dimensions = in.readLine().split(" ");
 
