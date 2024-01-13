@@ -219,14 +219,13 @@ public class Board {
      *            Size of the board along y-axis
      */
     public Board(int sizeX, int sizeY) {
-        //TODO placeholder
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         board = new Square[sizeY][sizeX];
         
         for (int i = 0; i < sizeX; i++) {
             for (int j = 0; j < sizeY; j++) {
-                board[j][i] = new Square(false);
+                board[j][i] = new Square(Math.random() < 0.25);
             }
         }
     }
