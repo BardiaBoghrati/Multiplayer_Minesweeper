@@ -14,40 +14,63 @@ import minesweeper.Board;
  */
 public class MinesweeperServer {
 
-    // System thread safety argument
-    //   It is unclear to me whether ServerSocket is threadsafe. Regardless, having
-    //   multiple threads listing on the same port for connections make no sense.
-    //   In our design client connection are handle by separate threads from the
-    //   main server listening thread.
-    //
-    //   Allowing multiple threads to run the server can be problematic, as one can imagine
-    //   it might cause multiple client threads to receive the same client socket causing
-    //   duplicate communication and modification. We avoid these possible sort of
-    //   race conditions by allowing only one thread--the main server listing thread--
-    //   to run server(). This is achieved by synchronizing server() on this server's lock.
-    //   We still allow other threads to terminate the server because, as ServerSocket's
-    //   spec suggests, close() can be called while another thread is blocked on accept().
-    //
-    //   As I mentioned each connected client socket is confined to its own thread, as a 
-    //   result all communication with the client is also confined to that thread.
-    //
-    //   As clients connect and disconnect from the server, the number of connected clients 
-    //   is tracked through numberOfClients. All modifications/writes to this variable is
-    //   synchronized via the same lock--not the same as the sever's lock which is held by
-    //   the server thread. However, reading of this variable is unguarded. On connection
-    //   to the server, the client handler will send a hello message containing the number
-    //   of active players (clients) in the game. Suppose, numberOfClients is modified while
-    //   sending the hello message, that means the message sent may not reflect the actual
-    //   number of clients, but that is fine because what the client sees in the hello message
-    //   is consistent with some occurrence of events relative to their connection; other 
-    //   clients either connected or disconnected before or after their connection.
-    //
-    //   The minesweeper board is a threadsafe data type; it is safe for concurrent modification
-    //   by multiple clients. Request-response associated with board's operations also satisfy 
-    //   serializability; the possible interleaving between the time of a mutating operation 
-    //   (dig, flag, deflag) on the board and obtaining the observable state (via toString()) 
-    //   doesn't threaten the consistency of the observed result by the client.
-
+    /*
+     * System thread safety argument:
+     * 
+     * It is unclear to me whether ServerSocket is threadsafe. Regardless,
+     * having multiple threads listing on the same port for connections make no
+     * sense. In our design client connections are handle by separate threads
+     * from the main server listening thread.
+     * 
+     * Allowing multiple threads to run the server can be problematic, as one
+     * can imagine it might cause multiple client threads to receive the same
+     * client socket causing duplicate communication and modification. We avoid
+     * these possible sort of race conditions by allowing only one thread--the
+     * main server listing thread--to run server(). This is achieved by
+     * synchronizing server() on this server's lock. We still allow other
+     * threads to terminate the server because, as ServerSocket's spec suggests,
+     * close() can be called while another thread is blocked on accept().
+     * 
+     * As I mentioned each connected client socket is confined to its own
+     * thread, as a result all communication with the client is also confined to
+     * that thread.
+     * 
+     * As clients connect and disconnect from the server, the number of
+     * connected clients is tracked through numberOfClients. All
+     * modifications/writes of the rep numberOfClients are synchronized on the
+     * same lock--distinct from the server's lock which is held by the main
+     * thread. However, the reading of numberOfClients remains unguarded. On
+     * connection to the server, the client handler will send a hello message
+     * containing the number of active players (numberOfClients) in the game. By
+     * synchronizing the modifications, we know, when it's all said and done,
+     * when concurrent connections and disconnections have completed, we are not
+     * at risk of violating the invariant "numberOfClients must count the number
+     * of clients", that is, value of numberOfClients is eventually consistent.
+     * However, as the events are unfolding, while concurrent
+     * connections/disconnections are taking place, it is possible for a thread
+     * handling a connection to see a value of numberOfClients not consistent
+     * with the number of connected clients; consequently, sending a hello
+     * message with number of players different from the actual number of
+     * clients connected at that time. This should be fine, however, because
+     * what the client sees is consistent with some relative ordering of events;
+     * it is consistent with other connections/disconnections occurring before
+     * or after its connections.
+     * 
+     * You may ask why not just guard the reading of numberOfClients as well?
+     * numberOfClients is read then written to the output stream along the hello
+     * message. Synchronizing the reading of numberOfClients means synchronizing
+     * the writing to the stream. Writes can block; therefore, if one thread
+     * blocks on a write, synchronizing in this manner will cause all threads to
+     * block on that thread.
+     * 
+     * The minesweeper board is a threadsafe data type; it is safe for
+     * concurrent modification by multiple clients. Request-response associated
+     * with board's operations also satisfy serializability; the possible
+     * interleaving between the time of a mutating operation (dig, flag, deflag)
+     * on the board and obtaining the observable state (via toString()) doesn't
+     * threaten the consistency of the observed result by the client.
+     */
+    
     /** Default server port. */
     private static final int DEFAULT_PORT = 4444;
     /** Maximum port number as defined by ServerSocket. */
